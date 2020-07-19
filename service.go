@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -173,12 +174,12 @@ func NewSeleniumService(jarPath string, port int, opts ...ServiceOption) (*Servi
 	if s.javaPath != "" {
 		s.cmd.Path = s.javaPath
 	}
-	if s.geckoDriverPath != "" {
-		s.cmd.Args = append([]string{"java", "-Dwebdriver.gecko.driver=" + s.geckoDriverPath}, s.cmd.Args[1:]...)
-	}
-	if s.chromeDriverPath != "" {
-		s.cmd.Args = append([]string{"java", "-Dwebdriver.chrome.driver=" + s.chromeDriverPath}, s.cmd.Args[1:]...)
-	}
+	// if s.geckoDriverPath != "" {
+	// 	s.cmd.Args = append([]string{"java", "-Dwebdriver.gecko.driver=" + s.geckoDriverPath}, s.cmd.Args[1:]...)
+	// }
+	// if s.chromeDriverPath != "" {
+	// 	s.cmd.Args = append([]string{"java", "-Dwebdriver.chrome.driver=" + s.chromeDriverPath}, s.cmd.Args[1:]...)
+	// }
 
 	var classpath []string
 	if s.htmlUnitPath != "" {
@@ -186,7 +187,9 @@ func NewSeleniumService(jarPath string, port int, opts ...ServiceOption) (*Servi
 	}
 	classpath = append(classpath, jarPath)
 	s.cmd.Args = append(s.cmd.Args, "-cp", strings.Join(classpath, ":"))
-	s.cmd.Args = append(s.cmd.Args, "org.openqa.grid.selenium.GridLauncherV3", "-port", strconv.Itoa(port), "-debug")
+	// s.cmd.Args = append(s.cmd.Args, "org.openqa.grid.selenium.GridLauncherV3", "-port", strconv.Itoa(port), "-debug")
+	s.cmd.Args = append([]string{"-jar " + filepath.Base(jarPath)}, s.cmd.Args...)
+	s.cmd.Args = append(s.cmd.Args, "-port", strconv.Itoa(port), "-debug")
 
 	if err := s.start(port); err != nil {
 		return nil, err
